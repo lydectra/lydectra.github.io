@@ -1,1 +1,112 @@
+<html>
 
+<head>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <script>
+        const MAP = [
+            [0, 5, 6],
+            [2, 1, 0],
+            [0, 3, 4]
+        ];
+
+        let ITEMS = ['a coffee'];
+
+        const KILLER = Math.floor(Math.random() * 3);
+
+        const TEXT = [
+            'You are working in a small cafe.\nThe customers are waiting for their orders.',
+            'A tired customer is sitting by the window:\n"Can I have my coffee please?"',
+            'A nervous customer is looking at the door:\n"I ordered a muffin..."',
+            'A quiet customer is reading a newspaper:\n"I am waiting for my sandwich."',
+            'You enter the supplier room to reload.\nSomething feels wrong here...',
+            'The cafe is silent now.\nOne of the customers is the murderer.\nUse the bloody receipt to question them.'
+        ];
+    </script>
+
+    <script src="game-logic.js"></script>
+</head>
+
+<body>
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .interactive" game-logic>
+
+        <a-assets>
+            <img id="sky1" src="cafe.png">
+            <img id="sky2" src="customer1.png">
+            <img id="sky3" src="customer2.png">
+            <img id="sky4" src="customer3.png">
+            <img id="sky5" src="supplier-room.png">
+            <img id="sky6" src="mystery.png">
+        </a-assets>
+
+        <a-sky id="sky" rotation="0 -90 0"></a-sky>
+
+        <a-camera wasd-controls="enabled:false">
+            <a-plane color="#000" height="0.3" opacity="0.25" position="0 -0.6 -1">
+                <a-text id="info" width="1" value="" font="monoid" align="center"></a-text>
+                <a-cone id="east" scale="0.05 0.05 0.05" position="0.55 0 0" rotation="0 -30 -88"></a-cone>
+                <a-cone id="west" scale="0.05 0.05 0.05" position="-0.55 0 0" rotation="0 30 88"></a-cone>
+                <a-cone id="north" scale="0.05 0.05 0.05" position="0 0.2 0" rotation="-20 0 0"></a-cone>
+                <a-cone id="south" scale="0.05 0.05 0.05" position="0 -0.2 0" rotation="-40 0 180"></a-cone>
+            </a-plane>
+            <a-cursor fuse="true"></a-cursor>
+        </a-camera>
+
+        <a-entity id="scene1" class="scene"></a-entity>
+
+        <a-entity id="scene2" class="scene" visible="false">
+            <a-cylinder class="interactive" position="-3 1 -4" scale="0.5 2 0.5" visible="false"
+                drop="a coffee"
+                pick="a muffin"
+                goal='"Thank you. That was exactly what I needed."\nYou pick up the next order: a muffin.'
+                fail='"Excuse me, I ordered coffee."'>
+            </a-cylinder>
+        </a-entity>
+
+        <a-entity id="scene3" class="scene" visible="false">
+            <a-cylinder class="interactive" position="-1.25 0.75 -4" scale="0.5 3 0.5" visible="false"
+                drop="a muffin"
+                pick="a sandwich"
+                goal='"Finally. I was waiting too long."\nYou pick up the next order: a sandwich.'
+                fail='"That is not my order. I asked for a muffin."'>
+            </a-cylinder>
+        </a-entity>
+
+        <a-entity id="scene4" class="scene" visible="false">
+            <a-cylinder class="interactive" position="4 2 1" scale="0.5 1 0.5" visible="false"
+                drop="a sandwich"
+                pick="an empty tray"
+                goal='"Thanks."\nAll customers are served. You need to go to the supplier room to reload.'
+                fail='"I am still waiting for my sandwich."'>
+            </a-cylinder>
+        </a-entity>
+
+        <a-entity id="scene5" class="scene" visible="false">
+            <a-cylinder class="interactive" position="-4 -1.5 2.5" visible="false"
+                drop="an empty tray"
+                pick="a bloody receipt"
+                goal='You enter the supplier room and freeze.\nThere is a dead body on the floor.\nBeside it, you find a bloody receipt.'
+                fail='You should finish serving all customers before reloading supplies.'>
+            </a-cylinder>
+        </a-entity>
+
+        <a-entity id="scene6" class="scene" visible="false">
+
+            <a-cylinder class="interactive suspect" suspect="0" position="-4 1 -4" scale="0.5 2 0.5" visible="false"
+                drop="a bloody receipt">
+            </a-cylinder>
+
+            <a-cylinder class="interactive suspect" suspect="1" position="0 1 -4" scale="0.5 2 0.5" visible="false"
+                drop="a bloody receipt">
+            </a-cylinder>
+
+            <a-cylinder class="interactive suspect" suspect="2" position="4 1 -4" scale="0.5 2 0.5" visible="false"
+                drop="a bloody receipt">
+            </a-cylinder>
+
+        </a-entity>
+
+    </a-scene>
+</body>
+
+</html>
