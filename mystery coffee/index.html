@@ -37,6 +37,10 @@
             <img id="sky4" src="customer3.png">
             <img id="sky5" src="supplier-room.png">
             <img id="sky6" src="mystery.png">
+
+            <img id="tiredCustomer" src="tired-customer.png">
+            <img id="nervousCustomer" src="nervous-customer.png">
+            <img id="quietCustomer" src="quiet-customer.png">
         </a-assets>
 
         <a-sky id="sky" rotation="0 -90 0"></a-sky>
@@ -55,30 +59,33 @@
         <a-entity id="scene1" class="scene"></a-entity>
 
         <a-entity id="scene2" class="scene" visible="false">
-            <a-cylinder class="interactive" position="-3 1 -4" scale="0.5 2 0.5" visible="false"
+            <a-plane class="interactive" position="-3 1 -4" scale="0.5 2 0.5" visible="false"
+                src="#tired-customer.png"
                 drop="a coffee"
                 pick="a muffin"
                 goal='"Thank you. That was exactly what I needed."\nYou pick up the next order: a muffin.'
                 fail='"Excuse me, I ordered coffee."'>
-            </a-cylinder>
+            </a-plane>
         </a-entity>
 
         <a-entity id="scene3" class="scene" visible="false">
-            <a-cylinder class="interactive" position="-1.25 0.75 -4" scale="0.5 3 0.5" visible="false"
+            <a-plane class="interactive" position="-1.25 0.75 -4" scale="0.5 3 0.5" visible="false"
+                src="#nervous-customer.png"
                 drop="a muffin"
                 pick="a sandwich"
                 goal='"Finally. I was waiting too long."\nYou pick up the next order: a sandwich.'
                 fail='"That is not my order. I asked for a muffin."'>
-            </a-cylinder>
+            </a-plane>
         </a-entity>
 
         <a-entity id="scene4" class="scene" visible="false">
-            <a-cylinder class="interactive" position="4 2 1" scale="0.5 1 0.5" visible="false"
+            <a-plane class="interactive" position="4 2 1" scale="0.5 1 0.5" visible="false"
+                src="#quiet-customer.png"
                 drop="a sandwich"
                 pick="an empty tray"
                 goal='"Thanks."\nAll customers are served. You need to go to the supplier room to reload.'
                 fail='"I am still waiting for my sandwich."'>
-            </a-cylinder>
+            </a-plane>
         </a-entity>
 
         <a-entity id="scene5" class="scene" visible="false">
@@ -92,21 +99,38 @@
 
         <a-entity id="scene6" class="scene" visible="false">
 
-            <a-cylinder class="interactive suspect" suspect="0" position="-4 1 -4" scale="0.5 2 0.5" visible="false"
-                drop="a bloody receipt">
-            </a-cylinder>
+        <a-plane class="interactive suspect"
+            src="#tired-customer.png"
+            suspect="0"
+            position="-2 1.2 -3"
+            width="1.2"
+            height="2"
+            transparent="true"
+            drop="a bloody receipt">
+        </a-plane>
 
-            <a-cylinder class="interactive suspect" suspect="1" position="0 1 -4" scale="0.5 2 0.5" visible="false"
-                drop="a bloody receipt">
-            </a-cylinder>
+        <a-plane class="interactive suspect"
+            src="#nervous-customer.png"
+            suspect="1"
+            position="0 1.2 -3"
+            width="1.2"
+            height="2"
+            transparent="true"
+            drop="a bloody receipt">
+        </a-plane>
 
-            <a-cylinder class="interactive suspect" suspect="2" position="4 1 -4" scale="0.5 2 0.5" visible="false"
-                drop="a bloody receipt">
-            </a-cylinder>
+        <a-plane class="interactive suspect"
+            src="#quiet-customer.png"
+            suspect="2"
+            position="2 1.2 -3"
+            width="1.2"
+            height="2"
+            transparent="true"
+            drop="a bloody receipt">
+        </a-plane>
 
-        </a-entity>
+    </a-entity>
 
     </a-scene>
 </body>
-
 </html>
