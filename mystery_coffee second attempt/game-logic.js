@@ -3,6 +3,13 @@ AFRAME.registerComponent('game-logic', {
         this.cam = document.querySelector('a-camera');
         this.info = document.querySelector('#info');
 
+        this.served = {
+            2: false,
+            3: false,
+            4: false,
+            5: false
+        };
+
         this.suspectNames = [
             'the tired customer',
             'the nervous customer',
@@ -11,6 +18,7 @@ AFRAME.registerComponent('game-logic', {
 
         document.querySelectorAll('.scene .interactive').forEach(el => {
             el.setAttribute('data-clickable', 'true');
+            el.removeAttribute('served');
         });
 
         this.el.addEventListener('click', (evt) => {
@@ -18,7 +26,10 @@ AFRAME.registerComponent('game-logic', {
             if (!target) return;
 
             const sceneParent = target.closest('.scene');
-            if (sceneParent && sceneParent.id !== 'scene' + this.scene) return;
+
+            if (sceneParent && sceneParent.id !== 'scene' + this.scene) {
+                return;
+            }
 
             const nav = target.getAttribute('nav');
             if (nav) {
@@ -32,8 +43,8 @@ AFRAME.registerComponent('game-logic', {
                 return;
             }
 
-            if (target.getAttribute('served') === 'true') {
-                this.updateText('You already served this customer.\nGo to the next customer.');
+            if (this.served[this.scene]) {
+                this.updateText('You already did this part.\nGo to the next place.');
                 return;
             }
 
@@ -50,15 +61,15 @@ AFRAME.registerComponent('game-logic', {
                         ITEMS.push(pick);
                     }
 
+                    this.served[this.scene] = true;
+
                     if (target.getAttribute('clue') === 'true') {
-                        target.setAttribute('served', 'true');
                         this.updateText(
                             'You enter the supplier room and freeze.\n' +
                             'There is a dead body on the floor.\n' +
                             CLUES[KILLER]
                         );
                     } else {
-                        target.setAttribute('served', 'true');
                         this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
                     }
                 } else {
@@ -132,7 +143,6 @@ AFRAME.registerComponent('game-logic', {
         });
 
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
-
         this.updateText(TEXT[s - 1]);
     },
 
