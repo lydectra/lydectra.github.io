@@ -1,1 +1,170 @@
+<html>
+<head>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
+    <script>
+        let ITEMS = ['a coffee'];
+
+        const KILLER = Math.floor(Math.random() * 3);
+
+        const CLUES = [
+            'The bloody receipt has a coffee stain on it.\nOnly the tired customer was drinking coffee.',
+            'The bloody receipt is ripped.\nOnly the nervous customer was acting strangely.',
+            'The bloody receipt has black newspaper ink on it.\nOnly the quiet customer was reading a newspaper.'
+        ];
+
+        const TEXT = [
+            'You are working in a small cafe.\nThe customers are waiting for their orders.',
+            'A tired customer is sitting by the window:\n"Can I have my coffee please?"',
+            'A nervous customer is looking at the door:\n"I ordered a muffin..."',
+            'A quiet customer is reading a newspaper:\n"I am waiting for my sandwich."',
+            'You enter the supplier room to reload.\nSomething feels wrong here...',
+            'The cafe is silent now.\nOne of the customers is the murderer.\nUse the bloody receipt to question them.'
+        ];
+    </script>
+
+    <script src="game-logic.js"></script>
+</head>
+
+<body>
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .interactive" game-logic>
+
+        <a-assets>
+            <img id="sky1" src="cafe1.png">
+            <img id="sky2" src="cafe1.png">
+            <img id="sky3" src="cafe1.png">
+            <img id="sky4" src="cafe1.png">
+            <img id="sky5" src="supplier-room.png">
+            <img id="sky6" src="mystery.png">
+
+            <img id="tiredCustomer" src="tired-customer.png">
+            <img id="nervousCustomer" src="nervous-customer.png">
+            <img id="quietCustomer" src="quiet-customer.png">
+        </a-assets>
+
+        <a-sky id="sky" rotation="0 -90 0"></a-sky>
+
+        <a-camera wasd-controls="enabled:false">
+            <a-plane color="#000" height="0.5" width="1.35" opacity="0.35" position="0 -0.6 -1">
+                <a-text id="info" width="1.15" value="" font="monoid" align="center" position="0 0.1 0.01"></a-text>
+
+                <a-plane class="interactive" nav="1" color="#333" width="0.22" height="0.07" position="-0.48 -0.16 0.02">
+                    <a-text value="Cafe" align="center" width="0.8" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <a-plane class="interactive" nav="2" color="#333" width="0.22" height="0.07" position="-0.24 -0.16 0.02">
+                    <a-text value="Tired" align="center" width="0.8" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <a-plane class="interactive" nav="3" color="#333" width="0.26" height="0.07" position="0.02 -0.16 0.02">
+                    <a-text value="Nervous" align="center" width="0.75" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <a-plane class="interactive" nav="4" color="#333" width="0.22" height="0.07" position="0.3 -0.16 0.02">
+                    <a-text value="Quiet" align="center" width="0.8" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <a-plane class="interactive" nav="5" color="#333" width="0.3" height="0.07" position="-0.18 -0.25 0.02">
+                    <a-text value="Supplier" align="center" width="0.7" position="0 0 0.01"></a-text>
+                </a-plane>
+
+                <a-plane class="interactive" nav="6" color="#333" width="0.36" height="0.07" position="0.2 -0.25 0.02">
+                    <a-text value="Investigate" align="center" width="0.62" position="0 0 0.01"></a-text>
+                </a-plane>
+            </a-plane>
+
+            <a-cursor fuse="false"></a-cursor>
+        </a-camera>
+
+        <a-entity id="scene1" class="scene"></a-entity>
+
+        <a-entity id="scene2" class="scene" visible="false">
+            <a-plane class="interactive"
+                src="#tiredCustomer"
+                position="-1 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a coffee"
+                pick="a muffin"
+                goal='"Thank you. That was exactly what I needed."\nYou pick up the next order: a muffin.'
+                fail='"Excuse me, I ordered coffee."'>
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="scene3" class="scene" visible="false">
+            <a-plane class="interactive"
+                src="#nervousCustomer"
+                position="-1 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a muffin"
+                pick="a sandwich"
+                goal='"Finally. I was waiting too long."\nYou pick up the next order: a sandwich.'
+                fail='"That is not my order. I asked for a muffin."'>
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="scene4" class="scene" visible="false">
+            <a-plane class="interactive"
+                src="#quietCustomer"
+                position="-1 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a sandwich"
+                pick="an empty tray"
+                goal='"Thanks."\nAll customers are served. You need to go to the supplier room to reload.'
+                fail='"I am still waiting for my sandwich."'>
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="scene5" class="scene" visible="false">
+            <a-cylinder class="interactive"
+                position="-1 0.5 -3"
+                radius="0.7"
+                height="1"
+                material="opacity: 0; transparent: true"
+                drop="an empty tray"
+                pick="a bloody receipt"
+                clue="true"
+                fail="You should finish serving all customers before reloading supplies.">
+            </a-cylinder>
+        </a-entity>
+
+        <a-entity id="scene6" class="scene" visible="false">
+            <a-plane class="interactive suspect"
+                src="#tiredCustomer"
+                suspect="0"
+                position="-2 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a bloody receipt">
+            </a-plane>
+
+            <a-plane class="interactive suspect"
+                src="#nervousCustomer"
+                suspect="1"
+                position="0 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a bloody receipt">
+            </a-plane>
+
+            <a-plane class="interactive suspect"
+                src="#quietCustomer"
+                suspect="2"
+                position="2 1.2 -3"
+                width="1.2"
+                height="2"
+                material="transparent: true; alphaTest: 0.1"
+                drop="a bloody receipt">
+            </a-plane>
+        </a-entity>
+
+    </a-scene>
+</body>
+</html>
