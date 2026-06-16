@@ -9,12 +9,16 @@ AFRAME.registerComponent('game-logic', {
             'the quiet customer'
         ];
 
+        document.querySelectorAll('.scene .interactive').forEach(el => {
+            el.setAttribute('data-clickable', 'true');
+        });
+
         this.el.addEventListener('click', (evt) => {
             const target = evt.target.closest('[nav], [suspect], [drop], [pick]');
             if (!target) return;
 
             const sceneParent = target.closest('.scene');
-            if (sceneParent && sceneParent.getAttribute('visible') !== true) return;
+            if (sceneParent && sceneParent.id !== 'scene' + this.scene) return;
 
             const nav = target.getAttribute('nav');
             if (nav) {
@@ -47,6 +51,7 @@ AFRAME.registerComponent('game-logic', {
                     }
 
                     if (target.getAttribute('clue') === 'true') {
+                        target.setAttribute('served', 'true');
                         this.updateText(
                             'You enter the supplier room and freeze.\n' +
                             'There is a dead body on the floor.\n' +
@@ -111,11 +116,21 @@ AFRAME.registerComponent('game-logic', {
         this.scene = s;
         this.cam.setAttribute('position', '0 1.5 0');
 
-        document.querySelectorAll('.scene').forEach(el => {
-            el.setAttribute('visible', false);
+        document.querySelectorAll('.scene').forEach(scene => {
+            scene.setAttribute('visible', false);
+
+            scene.querySelectorAll('[data-clickable="true"]').forEach(el => {
+                el.classList.remove('interactive');
+            });
         });
 
-        document.querySelector('#scene' + s).setAttribute('visible', true);
+        const currentScene = document.querySelector('#scene' + s);
+        currentScene.setAttribute('visible', true);
+
+        currentScene.querySelectorAll('[data-clickable="true"]').forEach(el => {
+            el.classList.add('interactive');
+        });
+
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
 
         this.updateText(TEXT[s - 1]);
