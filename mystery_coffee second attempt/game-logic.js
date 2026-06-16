@@ -14,47 +14,52 @@ AFRAME.registerComponent('game-logic', {
             if (!target) return;
 
             const sceneParent = target.closest('.scene');
-            if (sceneParent && sceneParent.getAttribute('visible') === false) return;
+
+            if (sceneParent && sceneParent.getAttribute('visible') !== true) {
+                return;
+            }
 
             const nav = target.getAttribute('nav');
+
             if (nav) {
                 this.goToScene(Number(nav));
-            return;
-        }
-
-        const suspect = target.getAttribute('suspect');
-        if (suspect !== null) {
-                this.checkSuspect(Number(suspect));
-        return;
-        }
-
-        const drop = target.getAttribute('drop');
-        const pick = target.getAttribute('pick');
-
-        if (drop) {
-            const i = ITEMS.indexOf(drop);
-
-        if (i >= 0) {
-            ITEMS.splice(i, 1);
-
-            if (pick) {
-                ITEMS.push(pick);
-        }
-
-            if (target.getAttribute('clue') === 'true') {
-                this.updateText(
-                    'You enter the supplier room and freeze.\n' +
-                    'There is a dead body on the floor.\n' +
-                    CLUES[KILLER]
-                );
-            } else {
-                this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
+                return;
             }
-        } else {
-            this.updateText(target.getAttribute('fail') || TEXT[this.scene - 1]);
-        }
-    }
-});
+
+            const suspect = target.getAttribute('suspect');
+
+            if (suspect !== null) {
+                this.checkSuspect(Number(suspect));
+                return;
+            }
+
+            const drop = target.getAttribute('drop');
+            const pick = target.getAttribute('pick');
+
+            if (drop) {
+                const i = ITEMS.indexOf(drop);
+
+                if (i >= 0) {
+                    ITEMS.splice(i, 1);
+
+                    if (pick) {
+                        ITEMS.push(pick);
+                    }
+
+                    if (target.getAttribute('clue') === 'true') {
+                        this.updateText(
+                            'You enter the supplier room and freeze.\n' +
+                            'There is a dead body on the floor.\n' +
+                            CLUES[KILLER]
+                        );
+                    } else {
+                        this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
+                    }
+                } else {
+                    this.updateText(target.getAttribute('fail') || TEXT[this.scene - 1]);
+                }
+            }
+        });
 
         this.loadScene(1);
     },
@@ -104,12 +109,15 @@ AFRAME.registerComponent('game-logic', {
     loadScene: function (s) {
         this.scene = s;
         this.cam.setAttribute('position', '0 1.5 0');
-        this.updateText(TEXT[s - 1]);
 
-        document.querySelectorAll('.scene').forEach(el => el.setAttribute('visible', false));
+        document.querySelectorAll('.scene').forEach(el => {
+            el.setAttribute('visible', false);
+        });
+
         document.querySelector('#scene' + s).setAttribute('visible', true);
-
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
+
+        this.updateText(TEXT[s - 1]);
     },
 
     updateText: function (t) {
