@@ -14,22 +14,22 @@ AFRAME.registerComponent('game-logic', {
             if (!target) return;
 
             const sceneParent = target.closest('.scene');
-
-            if (sceneParent && sceneParent.getAttribute('visible') !== true) {
-                return;
-            }
+            if (sceneParent && sceneParent.getAttribute('visible') !== true) return;
 
             const nav = target.getAttribute('nav');
-
             if (nav) {
                 this.goToScene(Number(nav));
                 return;
             }
 
             const suspect = target.getAttribute('suspect');
-
             if (suspect !== null) {
                 this.checkSuspect(Number(suspect));
+                return;
+            }
+
+            if (target.getAttribute('served') === 'true') {
+                this.updateText('You already served this customer.\nGo to the next customer.');
                 return;
             }
 
@@ -53,6 +53,7 @@ AFRAME.registerComponent('game-logic', {
                             CLUES[KILLER]
                         );
                     } else {
+                        target.setAttribute('served', 'true');
                         this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
                     }
                 } else {
