@@ -18,14 +18,14 @@ AFRAME.registerComponent('game-logic', {
                 src: '#tiredCustomer',
                 drop: 'a coffee',
                 pick: 'a muffin',
-                goal: 'You give the tired customer the coffee.\n"Thank you."\nYou now carry a muffin for the next customer.',
+                goal: 'You give the tired customer the coffee.\n"Thank you."',
                 fail: '"Excuse me, I ordered coffee."'
             },
             3: {
                 src: '#nervousCustomer',
                 drop: 'a muffin',
                 pick: 'a sandwich',
-                goal: 'You give the nervous customer the muffin.\n"Finally, thank you."\nYou now carry a sandwich for the next customer.',
+                goal: 'You give the nervous customer the muffin.\n"Finally, thank you."',
                 fail: '"That is not my order. I asked for a muffin."'
             },
             4: {
