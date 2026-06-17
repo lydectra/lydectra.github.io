@@ -120,12 +120,15 @@ AFRAME.registerComponent('game-logic', {
             this.served[this.scene] = true;
 
             if (target.getAttribute('clue') === 'true') {
-                this.updateText(
-                    'You enter the supplier room and freeze.\n' +
-                    'There is a dead body on the floor.\n' +
-                    CLUES[KILLER]
-                );
-            } else {
+    target.setAttribute('visible', false);
+
+    this.updateText(
+        'There is a dead body on the floor!\n' +
+        'You select the bloody receipt as evidence.\n' +
+        CLUES[KILLER] +
+        '\nNow investigate the customers.'
+    );
+    } else {
                 this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
             }
         } else {
