@@ -83,7 +83,7 @@ AFRAME.registerComponent('game-logic', {
         if (!customer) return;
 
         if (this.served[this.scene]) {
-            this.updateText('You already served this customer.\nGo to the next place.');
+            this.updateText('You already served this customer.\nGo to the next one.');
             return;
         }
 
@@ -150,7 +150,7 @@ AFRAME.registerComponent('game-logic', {
 
     checkSuspect: function (suspectNumber) {
         if (!this.evidenceCollected) {
-            this.updateText('"Why are you asking me questions?"\nYou need evidence first.');
+            this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
             return;
         }
 
