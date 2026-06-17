@@ -4,6 +4,8 @@ AFRAME.registerComponent('game-logic', {
         this.info = document.querySelector('#info');
         this.customerPortrait = document.querySelector('#customerPortrait');
 
+        this.evidenceCollected = false;
+
         this.served = {
             2: false,
             3: false,
@@ -57,9 +59,7 @@ AFRAME.registerComponent('game-logic', {
             }
 
             const sceneParent = target.closest('.scene');
-            if (sceneParent && sceneParent.id !== 'scene' + this.scene) {
-                return;
-            }
+            if (sceneParent && sceneParent.id !== 'scene' + this.scene) return;
 
             const suspect = target.getAttribute('suspect');
             if (suspect !== null) {
@@ -80,10 +80,7 @@ AFRAME.registerComponent('game-logic', {
 
     serveCustomer: function () {
         const customer = this.customers[this.scene];
-
-        if (!customer) {
-            return;
-        }
+        if (!customer) return;
 
         if (this.served[this.scene]) {
             this.updateText('You already served this customer.\nGo to the next place.');
@@ -120,15 +117,16 @@ AFRAME.registerComponent('game-logic', {
             this.served[this.scene] = true;
 
             if (target.getAttribute('clue') === 'true') {
-    target.setAttribute('visible', false);
+                this.evidenceCollected = true;
+                target.setAttribute('visible', false);
 
-    this.updateText(
-        'There is a dead body on the floor!\n' +
-        'You select the bloody receipt as evidence.\n' +
-        CLUES[KILLER] +
-        '\nNow investigate the customers.'
-    );
-    } else {
+                this.updateText(
+                    'There is a dead body on the floor!\n' +
+                    'You select the bloody receipt as evidence.\n' +
+                    CLUES[KILLER] +
+                    '\nNow investigate the customers.'
+                );
+            } else {
                 this.updateText(target.getAttribute('goal') || TEXT[this.scene - 1]);
             }
         } else {
@@ -142,8 +140,8 @@ AFRAME.registerComponent('game-logic', {
             return;
         }
 
-        if (sceneNumber === 6 && !ITEMS.includes('a bloody receipt')) {
-            this.updateText('You cannot investigate yet.\nFind evidence in the supplier room first.');
+        if (sceneNumber === 6 && !this.evidenceCollected) {
+            this.updateText('You cannot investigate yet.\nClick the bloody receipt and select it as evidence first.');
             return;
         }
 
@@ -151,12 +149,10 @@ AFRAME.registerComponent('game-logic', {
     },
 
     checkSuspect: function (suspectNumber) {
-        if (!ITEMS.includes('a bloody receipt')) {
+        if (!this.evidenceCollected) {
             this.updateText('"Why are you asking me questions?"\nYou need evidence first.');
             return;
         }
-
-        ITEMS.splice(ITEMS.indexOf('a bloody receipt'), 1);
 
         if (suspectNumber === KILLER) {
             this.updateText(
@@ -194,19 +190,19 @@ AFRAME.registerComponent('game-logic', {
     },
 
     updateCustomerPortrait: function () {
-    const customer = this.customers[this.scene];
+        const customer = this.customers[this.scene];
 
-    if (customer) {
-        this.customerPortrait.setAttribute('visible', true);
-        this.customerPortrait.setAttribute('material', {
-            src: customer.src,
-            transparent: true,
-            alphaTest: 0.1
-        });
-    } else {
-        this.customerPortrait.setAttribute('visible', false);
-        this.customerPortrait.removeAttribute('src');
-    }
+        if (customer) {
+            this.customerPortrait.setAttribute('visible', true);
+            this.customerPortrait.setAttribute('material', {
+                src: customer.src,
+                transparent: true,
+                alphaTest: 0.1
+            });
+        } else {
+            this.customerPortrait.setAttribute('visible', false);
+            this.customerPortrait.removeAttribute('src');
+        }
     },
 
     updateText: function (t) {
