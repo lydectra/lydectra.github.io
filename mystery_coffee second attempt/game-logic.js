@@ -191,15 +191,19 @@ AFRAME.registerComponent('game-logic', {
     },
 
     updateCustomerPortrait: function () {
-        const customer = this.customers[this.scene];
+    const customer = this.customers[this.scene];
 
-        if (customer) {
-            this.customerPortrait.setAttribute('visible', true);
-            this.customerPortrait.setAttribute('src', customer.src);
-        } else {
-            this.customerPortrait.setAttribute('visible', false);
-            this.customerPortrait.removeAttribute('src');
-        }
+    if (customer) {
+        this.customerPortrait.setAttribute('visible', true);
+        this.customerPortrait.setAttribute('material', {
+            src: customer.src,
+            transparent: true,
+            alphaTest: 0.1
+        });
+    } else {
+        this.customerPortrait.setAttribute('visible', false);
+        this.customerPortrait.removeAttribute('src');
+    }
     },
 
     updateText: function (t) {
