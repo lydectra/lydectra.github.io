@@ -59,12 +59,18 @@ AFRAME.registerComponent('game-logic', {
         ];
 
         this.el.addEventListener('click', (evt) => {
-            const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
+            const target = evt.target.closest('[nav], [suspect], [drop], [pick], [back], #customerPortrait');
             if (!target) return;
 
             const nav = target.getAttribute('nav');
             if (nav) {
                 this.goToScene(Number(nav));
+                return;
+            }
+
+            const back = target.getAttribute('back');
+            if (back) {
+                this.exitZoom();
                 return;
             }
 
@@ -189,27 +195,6 @@ AFRAME.registerComponent('game-logic', {
             return;
         }
 
-        if (this.zoomedSuspect === suspectNumber) {
-            this.inspectedSuspects[suspectNumber] = true;
-            this.zoomedSuspect = null;
-            this.showAllSuspects();
-
-            if (this.inspectedSuspects.every(seen => seen)) {
-                this.accusationMode = true;
-                this.updateText(
-                    'You investigated all three customers.\n' +
-                    'Now click the person you think is the murderer.'
-                );
-            } else {
-                this.updateText(
-                    'You finish inspecting ' + this.suspectNames[suspectNumber] + '.\n' +
-                    'Inspect the other customers before accusing someone.'
-                );
-            }
-
-            return;
-        }
-
         this.zoomedSuspect = suspectNumber;
 
         for (let i = 0; i < 3; i++) {
@@ -221,18 +206,46 @@ AFRAME.registerComponent('game-logic', {
                 suspect.setAttribute('position', '0 1.55 -0.9');
                 suspect.setAttribute('width', '1.1');
                 suspect.setAttribute('height', '1.8');
-                suspect.classList.add('interactive');
             } else {
                 suspect.setAttribute('visible', false);
-                suspect.classList.remove('interactive');
             }
+        }
+
+        const backButton = document.querySelector('#backFromZoom');
+        if (backButton) {
+            backButton.setAttribute('visible', true);
         }
 
         this.updateText(
             'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
             'Look carefully for blood, bruises, or suspicious marks.\n' +
-            'Click them again to stop inspecting.'
+            'Click Back when you are done.'
         );
+    },
+
+    exitZoom: function () {
+        if (this.zoomedSuspect === null) {
+            return;
+        }
+
+        this.inspectedSuspects[this.zoomedSuspect] = true;
+        this.zoomedSuspect = null;
+        this.showAllSuspects();
+
+        const backButton = document.querySelector('#backFromZoom');
+        if (backButton) {
+            backButton.setAttribute('visible', false);
+        }
+
+        if (this.inspectedSuspects.every(seen => seen)) {
+            this.accusationMode = true;
+            this.updateText(
+                'You investigated all three customers.\n' +
+                'Now click the person you think is the murderer.'
+            );
+        } else {
+            this.updateText('Inspect the other customers before accusing someone.');
+        }
     },
 
     showAllSuspects: function () {
@@ -250,7 +263,6 @@ AFRAME.registerComponent('game-logic', {
             suspect.setAttribute('position', positions[i]);
             suspect.setAttribute('width', '0.75');
             suspect.setAttribute('height', '1.25');
-            suspect.classList.add('interactive');
         }
     },
 
@@ -267,6 +279,11 @@ AFRAME.registerComponent('game-logic', {
 
         document.querySelector('#scene' + s).setAttribute('visible', true);
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
+
+        const backButton = document.querySelector('#backFromZoom');
+        if (backButton) {
+            backButton.setAttribute('visible', false);
+        }
 
         this.updateCustomerPortrait();
 
