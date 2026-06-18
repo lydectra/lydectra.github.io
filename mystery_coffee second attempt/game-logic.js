@@ -54,7 +54,8 @@ AFRAME.registerComponent('game-logic', {
             '#quietCustomerGuilty'
         ];
     
-
+        this.zoomedSuspect = null;
+        
         this.el.addEventListener('click', (evt) => {
             const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
             if (!target) return;
@@ -162,21 +163,47 @@ AFRAME.registerComponent('game-logic', {
 
     checkSuspect: function (suspectNumber) {
         if (!this.evidenceCollected) {
-            this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
+             this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
+            return;
+        }
+
+        if (this.zoomedSuspect !== suspectNumber) {
+            this.zoomedSuspect = suspectNumber;
+
+            for (let i = 0; i < 3; i++) {
+                const suspect = document.querySelector('#suspect' + i);
+                if (!suspect) continue;
+
+                    if (i === suspectNumber) {
+                        suspect.setAttribute('visible', true);
+                        suspect.setAttribute('position', '0 1.55 -1');
+                        suspect.setAttribute('width', '1.1');
+                        suspect.setAttribute('height', '1.8');
+                    } else {
+                        suspect.setAttribute('visible', false);
+                    }
+            }
+
+            this.updateText(
+                'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
+                'Look carefully for blood, bruises, or suspicious marks.\n' +
+                'Click the same customer again to accuse them.'
+            );
+
             return;
         }
 
         if (suspectNumber === KILLER) {
             this.updateText(
-                'You show the bloody receipt to ' + this.suspectNames[suspectNumber] + '.\n' +
-                'They turn pale. The clue proves they were in the supplier room.\n' +
+                'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
+                'The marks match the evidence.\n' +
                 'You found the murderer!'
             );
             this.endGame('CASE CLOSED');
         } else {
             this.updateText(
                 'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
-                'But the clue does not match them.\n' +
+                'But the marks do not match the evidence.\n' +
                 'The real murderer escapes.'
             );
             this.endGame('WRONG SUSPECT');
@@ -221,14 +248,20 @@ AFRAME.registerComponent('game-logic', {
     },
 
     updateSuspectImages: function () {
+        this.zoomedSuspect = null;
+
         for (let i = 0; i < 3; i++) {
             const suspect = document.querySelector('#suspect' + i);
-
             if (!suspect) continue;
 
-                const image = i === KILLER
-                    ? this.guiltySuspectImages[i]
-                    : this.normalSuspectImages[i];
+            const image = i === KILLER
+                ? this.guiltySuspectImages[i]
+                : this.normalSuspectImages[i];
+
+            suspect.setAttribute('visible', true);
+            suspect.setAttribute('position', (i - 1) * 0.7 + ' 1.55 -1.2');
+            suspect.setAttribute('width', '0.7');
+            suspect.setAttribute('height', '1.2');
 
             suspect.setAttribute('material', {
                 src: image,
