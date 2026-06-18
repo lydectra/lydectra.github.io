@@ -42,6 +42,18 @@ AFRAME.registerComponent('game-logic', {
             'the nervous customer',
             'the quiet customer'
         ];
+        this.normalSuspectImages = [
+            '#tiredCustomer',
+            '#nervousCustomer',
+            '#quietCustomer'
+        ];
+
+        this.guiltySuspectImages = [
+            '#tiredCustomerGuilty',
+            '#nervousCustomerGuilty',
+            '#quietCustomerGuilty'
+        ];
+    
 
         this.el.addEventListener('click', (evt) => {
             const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
@@ -186,6 +198,9 @@ AFRAME.registerComponent('game-logic', {
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
 
         this.updateCustomerPortrait();
+        if (s === 6) {
+            this.updateSuspectImages();
+        }
         this.updateText(TEXT[s - 1]);
     },
 
@@ -205,6 +220,24 @@ AFRAME.registerComponent('game-logic', {
         }
     },
 
+    updateSuspectImages: function () {
+        for (let i = 0; i < 3; i++) {
+            const suspect = document.querySelector('#suspect' + i);
+
+            if (!suspect) continue;
+
+                const image = i === KILLER
+                    ? this.guiltySuspectImages[i]
+                    : this.normalSuspectImages[i];
+
+            suspect.setAttribute('material', {
+                src: image,
+                transparent: true,
+                alphaTest: 0.1
+            });
+        }
+    },
+    
     updateText: function (t) {
         const inventory = '\n\nYou are carrying ' + (ITEMS.length > 0 ? ITEMS.join(' and ') : 'nothing');
         this.info.setAttribute('value', t + inventory + '.');
