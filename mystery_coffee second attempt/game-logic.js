@@ -5,6 +5,9 @@ AFRAME.registerComponent('game-logic', {
         this.customerPortrait = document.querySelector('#customerPortrait');
 
         this.evidenceCollected = false;
+        this.zoomedSuspect = null;
+        this.inspectedSuspects = [false, false, false];
+        this.accusationMode = false;
 
         this.served = {
             2: false,
@@ -42,6 +45,7 @@ AFRAME.registerComponent('game-logic', {
             'the nervous customer',
             'the quiet customer'
         ];
+
         this.normalSuspectImages = [
             '#tiredCustomer',
             '#nervousCustomer',
@@ -53,9 +57,7 @@ AFRAME.registerComponent('game-logic', {
             '#nervousCustomerGuilty',
             '#quietCustomerGuilty'
         ];
-    
-        this.zoomedSuspect = null;
-        
+
         this.el.addEventListener('click', (evt) => {
             const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
             if (!target) return;
@@ -162,12 +164,52 @@ AFRAME.registerComponent('game-logic', {
     },
 
     checkSuspect: function (suspectNumber) {
-    if (!this.evidenceCollected) {
-        this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
-        return;
-    }
+        if (!this.evidenceCollected) {
+            this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
+            return;
+        }
 
-    if (this.zoomedSuspect !== suspectNumber) {
+        if (this.accusationMode) {
+            if (suspectNumber === KILLER) {
+                this.updateText(
+                    'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
+                    'The marks match the evidence.\n' +
+                    'You found the murderer!'
+                );
+                this.endGame('CASE CLOSED');
+            } else {
+                this.updateText(
+                    'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
+                    'But the marks do not match the evidence.\n' +
+                    'The real murderer escapes.'
+                );
+                this.endGame('WRONG SUSPECT');
+            }
+
+            return;
+        }
+
+        if (this.zoomedSuspect === suspectNumber) {
+            this.inspectedSuspects[suspectNumber] = true;
+            this.zoomedSuspect = null;
+            this.showAllSuspects();
+
+            if (this.inspectedSuspects.every(seen => seen)) {
+                this.accusationMode = true;
+                this.updateText(
+                    'You investigated all three customers.\n' +
+                    'Now click the person you think is the murderer.'
+                );
+            } else {
+                this.updateText(
+                    'You finish inspecting ' + this.suspectNames[suspectNumber] + '.\n' +
+                    'Inspect the other customers before accusing someone.'
+                );
+            }
+
+            return;
+        }
+
         this.zoomedSuspect = suspectNumber;
 
         for (let i = 0; i < 3; i++) {
@@ -176,39 +218,41 @@ AFRAME.registerComponent('game-logic', {
 
             if (i === suspectNumber) {
                 suspect.setAttribute('visible', true);
-                suspect.setAttribute('position', '0 1.55 -1');
+                suspect.setAttribute('position', '0 1.55 -0.9');
                 suspect.setAttribute('width', '1.1');
                 suspect.setAttribute('height', '1.8');
+                suspect.classList.add('interactive');
             } else {
                 suspect.setAttribute('visible', false);
+                suspect.classList.remove('interactive');
             }
         }
 
         this.updateText(
             'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
             'Look carefully for blood, bruises, or suspicious marks.\n' +
-            'Click the same customer again to accuse them.'
+            'Click them again to stop inspecting.'
         );
+    },
 
-        return;
-    }
+    showAllSuspects: function () {
+        const positions = [
+            '-0.8 1.55 -1.2',
+            '0 1.55 -1.2',
+            '0.8 1.55 -1.2'
+        ];
 
-    if (suspectNumber === KILLER) {
-        this.updateText(
-            'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
-            'The marks match the evidence.\n' +
-            'You found the murderer!'
-        );
-        this.endGame('CASE CLOSED');
-    } else {
-        this.updateText(
-            'You accuse ' + this.suspectNames[suspectNumber] + '.\n' +
-            'But the marks do not match the evidence.\n' +
-            'The real murderer escapes.'
-        );
-        this.endGame('WRONG SUSPECT');
-    }
-},
+        for (let i = 0; i < 3; i++) {
+            const suspect = document.querySelector('#suspect' + i);
+            if (!suspect) continue;
+
+            suspect.setAttribute('visible', true);
+            suspect.setAttribute('position', positions[i]);
+            suspect.setAttribute('width', '0.75');
+            suspect.setAttribute('height', '1.25');
+            suspect.classList.add('interactive');
+        }
+    },
 
     tick: function () {
     },
@@ -225,9 +269,11 @@ AFRAME.registerComponent('game-logic', {
         document.querySelector('#sky').setAttribute('src', '#sky' + s);
 
         this.updateCustomerPortrait();
+
         if (s === 6) {
             this.updateSuspectImages();
         }
+
         this.updateText(TEXT[s - 1]);
     },
 
@@ -249,29 +295,27 @@ AFRAME.registerComponent('game-logic', {
 
     updateSuspectImages: function () {
         this.zoomedSuspect = null;
-
-        const positions = [
-            '-0.8 1.55 -1.2',
-            '0 1.55 -1.2',
-            '0.8 1.55 -1.2'
-        ];
+        this.accusationMode = false;
+        this.inspectedSuspects = [false, false, false];
 
         for (let i = 0; i < 3; i++) {
             const suspect = document.querySelector('#suspect' + i);
             if (!suspect) continue;
 
-                const image = i === KILLER
+            const image = i === KILLER
                 ? this.guiltySuspectImages[i]
                 : this.normalSuspectImages[i];
 
-                suspect.setAttribute('visible', true);
-                suspect.setAttribute('position', positions[i]);
-                suspect.setAttribute('width', '0.75');
-                suspect.setAttribute('height', '1.25');
-                suspect.setAttribute('material', 'src: ' + image + '; transparent: true; alphaTest: 0.1');
+            suspect.setAttribute('material', {
+                src: image,
+                transparent: true,
+                alphaTest: 0.1
+            });
         }
+
+        this.showAllSuspects();
     },
-    
+
     updateText: function (t) {
         const inventory = '\n\nYou are carrying ' + (ITEMS.length > 0 ? ITEMS.join(' and ') : 'nothing');
         this.info.setAttribute('value', t + inventory + '.');
