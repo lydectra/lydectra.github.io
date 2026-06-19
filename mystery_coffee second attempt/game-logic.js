@@ -4,6 +4,10 @@ AFRAME.registerComponent('game-logic', {
         this.info = document.querySelector('#info');
         this.customerPortrait = document.querySelector('#customerPortrait');
 
+        this.musicPlayer = document.querySelector('#musicPlayer');
+        this.soundPlayer = document.querySelector('#soundPlayer');
+        this.musicStarted = false;
+
         this.evidenceCollected = false;
         this.zoomedSuspect = null;
         this.zoomReady = false;
@@ -65,7 +69,7 @@ AFRAME.registerComponent('game-logic', {
 
             const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
             if (!target) return;
-
+                this.startCafeMusic();
             this.lockClick();
 
             const nav = target.getAttribute('nav');
@@ -107,6 +111,41 @@ AFRAME.registerComponent('game-logic', {
         }, 400);
     },
 
+    startCafeMusic: function () {
+    if (this.musicStarted) return;
+
+    this.musicStarted = true;
+
+    this.musicPlayer.setAttribute('sound', {
+        src: '#cafeMusic',
+        autoplay: true,
+        loop: true,
+        volume: 0.35
+    });
+},
+
+changeToSpookyMusic: function () {
+    this.musicPlayer.removeAttribute('sound');
+
+    this.musicPlayer.setAttribute('sound', {
+        src: '#spookyMusic',
+        autoplay: true,
+        loop: true,
+        volume: 0.45
+    });
+},
+
+playSound: function (soundId) {
+    this.soundPlayer.removeAttribute('sound');
+
+    this.soundPlayer.setAttribute('sound', {
+        src: soundId,
+        autoplay: true,
+        loop: false,
+        volume: 0.8
+    });
+},
+    
     serveCustomer: function () {
         const customer = this.customers[this.scene];
         if (!customer) return;
@@ -122,6 +161,9 @@ AFRAME.registerComponent('game-logic', {
             ITEMS.splice(i, 1);
             ITEMS.push(customer.pick);
             this.served[this.scene] = true;
+            if (this.scene === 2) this.playSound('#tiredVoice');
+            if (this.scene === 3) this.playSound('#nervousVoice');
+            if (this.scene === 4) this.playSound('#quietVoice');
             this.updateText(customer.goal);
         } else {
             this.updateText(customer.fail);
@@ -147,6 +189,8 @@ AFRAME.registerComponent('game-logic', {
 
             if (target.getAttribute('clue') === 'true') {
                 this.evidenceCollected = true;
+                this.changeToSpookyMusic();
+                this.playSound('#receiptSound');
                 target.setAttribute('visible', false);
 
                 this.updateText(
