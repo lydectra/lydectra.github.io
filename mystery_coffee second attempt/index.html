@@ -45,9 +45,20 @@
             <img id="tiredCustomerGuilty" src="tired-customer-guilty.png">
             <img id="nervousCustomerGuilty" src="nervous-customer-guilty.png">
             <img id="quietCustomerGuilty" src="quiet-customer-guilty.png">
+
+            <audio id="cafeMusic" src="cafe-music.mp3"></audio>
+            <audio id="spookyMusic" src="spooky-music.mp3"></audio>
+
+            <audio id="tiredVoice" src="tired-voice.mp3"></audio>
+            <audio id="nervousVoice" src="nervous-voice.mp3"></audio>
+            <audio id="quietVoice" src="quiet-voice.mp3"></audio>
+
+            <audio id="receiptSound" src="receipt-sound.mp3"></audio>
         </a-assets>
 
         <a-sky id="sky" rotation="0 -90 0"></a-sky>
+        <a-entity id="musicPlayer"></a-entity>
+        <a-entity id="soundPlayer"></a-entity>
 
         <a-camera wasd-controls="enabled:false">
             <a-plane color="#000" height="0.5" width="1.35" opacity="0.35" position="0 -0.6 -1">
