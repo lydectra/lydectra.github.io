@@ -6,6 +6,7 @@ AFRAME.registerComponent('game-logic', {
 
         this.evidenceCollected = false;
         this.zoomedSuspect = null;
+        this.zoomReady = false;
         this.inspectedSuspects = [false, false, false];
         this.accusationMode = false;
         this.clickLocked = false;
@@ -183,7 +184,7 @@ AFRAME.registerComponent('game-logic', {
         }
 
         if (this.zoomedSuspect !== null) {
-            if (this.zoomedSuspect === suspectNumber) {
+            if (this.zoomedSuspect === suspectNumber && this.zoomReady) {
                 this.exitSuspectZoom(suspectNumber);
             }
 
@@ -200,6 +201,7 @@ AFRAME.registerComponent('game-logic', {
 
     zoomSuspect: function (suspectNumber) {
         this.zoomedSuspect = suspectNumber;
+        this.zoomReady = false;
 
         for (let i = 0; i < 3; i++) {
             const suspect = document.querySelector('#suspect' + i);
@@ -218,11 +220,18 @@ AFRAME.registerComponent('game-logic', {
         this.updateText(
             'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
             'Look carefully for blood, bruises, or suspicious marks.\n' +
-            'Click the same customer again to stop inspecting.'
+            'Click them again after a moment to stop inspecting.'
         );
+
+        setTimeout(() => {
+            if (this.zoomedSuspect === suspectNumber) {
+                this.zoomReady = true;
+            }
+        }, 1000);
     },
 
     exitSuspectZoom: function (suspectNumber) {
+        this.zoomReady = false;
         this.inspectedSuspects[suspectNumber] = true;
         this.zoomedSuspect = null;
         this.showAllSuspects();
@@ -318,6 +327,7 @@ AFRAME.registerComponent('game-logic', {
 
     updateSuspectImages: function () {
         this.zoomedSuspect = null;
+        this.zoomReady = false;
         this.accusationMode = false;
         this.inspectedSuspects = [false, false, false];
 
