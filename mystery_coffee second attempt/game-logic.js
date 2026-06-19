@@ -8,6 +8,7 @@ AFRAME.registerComponent('game-logic', {
         this.zoomedSuspect = null;
         this.inspectedSuspects = [false, false, false];
         this.accusationMode = false;
+        this.clickLocked = false;
 
         this.served = {
             2: false,
@@ -59,8 +60,12 @@ AFRAME.registerComponent('game-logic', {
         ];
 
         this.el.addEventListener('click', (evt) => {
+            if (this.clickLocked) return;
+
             const target = evt.target.closest('[nav], [suspect], [drop], [pick], #customerPortrait');
             if (!target) return;
+
+            this.lockClick();
 
             const nav = target.getAttribute('nav');
             if (nav) {
@@ -78,7 +83,7 @@ AFRAME.registerComponent('game-logic', {
 
             const suspect = target.getAttribute('suspect');
             if (suspect !== null) {
-                this.checkSuspect(Number(suspect));
+                this.handleSuspectClick(Number(suspect));
                 return;
             }
 
@@ -91,6 +96,14 @@ AFRAME.registerComponent('game-logic', {
         });
 
         this.loadScene(1);
+    },
+
+    lockClick: function () {
+        this.clickLocked = true;
+
+        setTimeout(() => {
+            this.clickLocked = false;
+        }, 400);
     },
 
     serveCustomer: function () {
@@ -163,9 +176,17 @@ AFRAME.registerComponent('game-logic', {
         this.loadScene(sceneNumber);
     },
 
-    checkSuspect: function (suspectNumber) {
+    handleSuspectClick: function (suspectNumber) {
         if (!this.evidenceCollected) {
             this.updateText('"Why are you asking me questions?"\nYou need evidence first!');
+            return;
+        }
+
+        if (this.zoomedSuspect !== null) {
+            if (this.zoomedSuspect === suspectNumber) {
+                this.exitSuspectZoom(suspectNumber);
+            }
+
             return;
         }
 
@@ -174,35 +195,12 @@ AFRAME.registerComponent('game-logic', {
             return;
         }
 
-        if (this.zoomedSuspect === suspectNumber) {
-            this.inspectedSuspects[suspectNumber] = true;
-            this.zoomedSuspect = null;
-            this.showAllSuspects();
-
-            if (this.inspectedSuspects.every(seen => seen)) {
-                this.accusationMode = true;
-                this.updateText(
-                    'You investigated all three customers.\n' +
-                    'Now click the person you think is the murderer.'
-                );
-            } else {
-                this.updateText('Inspect the other customers before accusing someone.');
-            }
-
-            return;
-        }
-
-        this.zoomedSuspect = suspectNumber;
         this.zoomSuspect(suspectNumber);
-
-        this.updateText(
-            'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
-            'Look carefully for blood, bruises, or suspicious marks.\n' +
-            'Click them again to stop inspecting.'
-        );
     },
 
     zoomSuspect: function (suspectNumber) {
+        this.zoomedSuspect = suspectNumber;
+
         for (let i = 0; i < 3; i++) {
             const suspect = document.querySelector('#suspect' + i);
             if (!suspect) continue;
@@ -212,11 +210,34 @@ AFRAME.registerComponent('game-logic', {
                 suspect.setAttribute('position', '0 1.55 -0.9');
                 suspect.setAttribute('width', '1.1');
                 suspect.setAttribute('height', '1.8');
-                suspect.classList.add('interactive');
             } else {
                 suspect.setAttribute('visible', false);
-                suspect.classList.remove('interactive');
             }
+        }
+
+        this.updateText(
+            'You inspect ' + this.suspectNames[suspectNumber] + '.\n' +
+            'Look carefully for blood, bruises, or suspicious marks.\n' +
+            'Click the same customer again to stop inspecting.'
+        );
+    },
+
+    exitSuspectZoom: function (suspectNumber) {
+        this.inspectedSuspects[suspectNumber] = true;
+        this.zoomedSuspect = null;
+        this.showAllSuspects();
+
+        if (this.inspectedSuspects.every(seen => seen)) {
+            this.accusationMode = true;
+            this.updateText(
+                'You investigated all three customers.\n' +
+                'Now click the person you think is the murderer.'
+            );
+        } else {
+            this.updateText(
+                'You finished inspecting ' + this.suspectNames[suspectNumber] + '.\n' +
+                'Inspect the other customers before accusing someone.'
+            );
         }
     },
 
@@ -235,7 +256,6 @@ AFRAME.registerComponent('game-logic', {
             suspect.setAttribute('position', positions[i]);
             suspect.setAttribute('width', '0.75');
             suspect.setAttribute('height', '1.25');
-            suspect.classList.add('interactive');
         }
     },
 
