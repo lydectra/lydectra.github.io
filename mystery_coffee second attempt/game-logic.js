@@ -59,9 +59,9 @@ AFRAME.registerComponent('game-logic', {
         ];
 
         this.guiltySuspectImages = [
-            '#tiredCustomerGuilty',
-            '#nervousCustomerGuilty',
-            '#quietCustomerGuilty'
+            '#tiredCustomerGuilty1',
+            '#nervousCustomerGuilty1',
+            '#quietCustomerGuilty1'
         ];
 
         this.el.addEventListener('click', (evt) => {
